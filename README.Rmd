@@ -37,20 +37,20 @@ This is a basic example which shows you how to create a hierarchical regression 
 ```{r}
 library(mtab)
 
-T <- data.frame(datasets::Titanic) |> 
+Titantic <- data.frame(datasets::Titanic) |> 
   tidyr::pivot_wider(values_from = "Freq", names_from = "Survived")
 
-T
+Titantic
 
-m1 <- glm(cbind(Yes, No) ~ Sex, data = T, family = "binomial")
-m2 <- glm(cbind(Yes, No) ~ Sex + Class, data = T, family = "binomial")
-m3 <- glm(cbind(Yes, No) ~ Sex * Class, data = T, family = "binomial")
-m4 <- glm(cbind(Yes, No) ~ Sex * Class + Age, data = T, family = "binomial")
+m1 <- glm(cbind(Yes, No) ~ Sex, data = Titantic, family = "binomial")
+m2 <- glm(cbind(Yes, No) ~ Sex + Class, data = Titantic, family = "binomial")
+m3 <- glm(cbind(Yes, No) ~ Sex * Class, data = Titantic, family = "binomial")
+m4 <- glm(cbind(Yes, No) ~ Sex * Class + Age, data = Titantic, family = "binomial")
 tabby <- h_tab(m1, m2, m3, m4)
 ```
 
 ```{r echo = FALSE}
-tabby$Term[attr(tabby, "indent")[[1]]] <- paste0("&nbsp; &nbsp; &nbsp;", tabby$Term[attr(tabby, "indent")[[1]]])
+tabby$Term[attr(tabby, "indent")[[1]]] <- paste0("&nbsp; &nbsp;", tabby$Term[attr(tabby, "indent")[[1]]])
 tabby$Term[!attr(tabby, "indent")[[1]]] <- paste0("**", tabby$Term[!attr(tabby, "indent")[[1]]], "**")
 ```
 
