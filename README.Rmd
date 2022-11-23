@@ -50,8 +50,6 @@ m4 <- glm(cbind(Yes, No) ~ Sex * Class + Age, data = T, family = "binomial")
 tabby <- h_tab(m1, m2, m3, m4)
 
 tabby |> 
-   knitr::kable(escape = FALSE) |> 
-   kableExtra::add_indent(which(attr(tabby, "indent")[[1]])) |> 
-   kableExtra::kable_classic()
+   knitr::kable(escape = FALSE)
 ```
 
