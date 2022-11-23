@@ -115,9 +115,10 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
   family <- insight::get_family(model)
   type <- NA
   if(family$family == "binomial" & family$link == "logit") type <- "OR"
+  if(family$family == "poisson" & family$link == "log") type <- "IRR"
 
   tabby_exp <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, exponentiate = TRUE))[, .(Parameter, CI_low, CI_high, Coefficient)]
-  tabby_ln <-data.table::data.table(parameters::parameters(model, ci_method = "wald"))[,.(lnOR = Coefficient, SE = SE, z, p)]
+  tabby_ln <-data.table::data.table(parameters::parameters(model, ci_method = "wald"))[,.(lnEffect = Coefficient, SE = SE, z, p)]
   tabby <- cbind(tabby_exp, tabby_ln)
 
 
@@ -136,13 +137,14 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
     tabby[, .(
       Term = Parameter,
       est95,
-      lnOR = papaja::print_num(lnOR),
+      lnEffect = papaja::print_num(lnEffect),
       SE = papaja::print_num(SE),
       z = papaja::print_num(z),
       p = papaja::print_p(p)
     )]
 
   names(tabby)[names(tabby) == "est95"] <- glue::glue("{type} [95\\% CI]")
+  names(tabby) <- gsub("Effect", type, names(tabby))
 
   tabby
 
@@ -156,8 +158,17 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
   if(family$family == "binomial" & family$link == "logit") type <- "OR"
   if(family$family == "poisson" & family$link == "log") type <- "IRR"
 
-  tabby_exp <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, exponentiate = TRUE, effects = "fixed"))[Component != "zero_inflated", .(Parameter, CI_low, CI_high, Coefficient)]
-  tabby_ln <-data.table::data.table(parameters::parameters(model, ci_method = "wald", effects = "fixed"))[Component != "zero_inflated",.(lnEffect = Coefficient, SE = SE, z, p)]
+  tabby_exp <-
+    data.table::data.table(
+      parameters::parameters(
+        model,
+        ci_method = ci_method,
+        exponentiate = TRUE,
+        effects = "fixed"
+      )
+    )[Component != "zero_inflated", .(Parameter, CI_low, CI_high, Coefficient)]
+  tabby_ln <-
+    data.table::data.table(parameters::parameters(model, ci_method = "wald", effects = "fixed"))[Component != "zero_inflated", .(lnEffect = Coefficient, SE = SE, z, p)]
   tabby <- cbind(tabby_exp, tabby_ln)
 
 
