@@ -1,0 +1,57 @@
+---
+output: github_document
+always_allow_html: true
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# mtab
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of mtab is to help create data structures from regression models which can be used to create publication ready tables.
+
+## Installation
+
+You can install the development version of mtab from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("conig/mtab")
+```
+
+## Example
+
+This is a basic example which shows you how to create a hierarchical regression table using {mtab}:
+
+```{r}
+library(mtab)
+
+T <- data.frame(datasets::Titanic) |> 
+  tidyr::pivot_wider(values_from = "Freq", names_from = "Survived")
+
+T
+
+m1 <- glm(cbind(Yes, No) ~ Sex, data = T, family = "binomial")
+m2 <- glm(cbind(Yes, No) ~ Sex + Class, data = T, family = "binomial")
+m3 <- glm(cbind(Yes, No) ~ Sex * Class, data = T, family = "binomial")
+m4 <- glm(cbind(Yes, No) ~ Sex * Class + Age, data = T, family = "binomial")
+
+tabby <- h_tab(m1, m2, m3, m4)
+
+tabby |> 
+   knitr::kable(escape = FALSE) |> 
+   kableExtra::add_indent(which(attr(tabby, "indent")[[1]])) |> 
+   kableExtra::kable_classic()
+```
+
