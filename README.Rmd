@@ -46,9 +46,17 @@ m1 <- glm(cbind(Yes, No) ~ Sex, data = T, family = "binomial")
 m2 <- glm(cbind(Yes, No) ~ Sex + Class, data = T, family = "binomial")
 m3 <- glm(cbind(Yes, No) ~ Sex * Class, data = T, family = "binomial")
 m4 <- glm(cbind(Yes, No) ~ Sex * Class + Age, data = T, family = "binomial")
-
 tabby <- h_tab(m1, m2, m3, m4)
+```
 
+```{r echo = FALSE}
+tabby$Term[attr(tabby, "indent")[[1]]] <- paste0("   ", tabby$Term[attr(tabby, "indent")[[1]]])
+tabby$Term[!attr(tabby, "indent")[[1]]] <- paste0("**", tabby$Term[!attr(tabby, "indent")[[1]]], "**")
+```
+
+Tables can be formatted with a range of functions including kable() or papaja::apa_table
+
+```{r}
 tabby |> 
    knitr::kable(escape = FALSE)
 ```
