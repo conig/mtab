@@ -50,7 +50,7 @@ tabby <- h_tab(m1, m2, m3, m4)
 ```
 
 ```{r echo = FALSE}
-tabby$Term[attr(tabby, "indent")[[1]]] <- paste0("   ", tabby$Term[attr(tabby, "indent")[[1]]])
+tabby$Term[attr(tabby, "indent")[[1]]] <- paste0("&nbsp; &nbsp; &nbsp;", tabby$Term[attr(tabby, "indent")[[1]]])
 tabby$Term[!attr(tabby, "indent")[[1]]] <- paste0("**", tabby$Term[!attr(tabby, "indent")[[1]]], "**")
 ```
 
