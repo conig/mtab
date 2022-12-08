@@ -166,11 +166,17 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
         exponentiate = TRUE,
         effects = "fixed"
       )
-    )[Component != "zero_inflated", .(Parameter, CI_low, CI_high, Coefficient)]
-  tabby_ln <-
-    data.table::data.table(parameters::parameters(model, ci_method = "wald", effects = "fixed"))[Component != "zero_inflated", .(lnEffect = Coefficient, SE = SE, z, p)]
-  tabby <- cbind(tabby_exp, tabby_ln)
+    )[, .(Parameter, CI_low, CI_high, Coefficient)]
 
+  tabby_ln <-
+    data.table::data.table(parameters::parameters(model, ci_method = "wald", effects = "fixed"))[, .(lnEffect = Coefficient, SE = SE, z, p)]
+
+    if("Component" %in% names(tabby_exp)){
+    tabby_exp <- tabby_exp[Component != "zero_inflated"]
+    tabby_ln <- tabby_ln[Component != "zero_inflated"]
+    }
+
+  tabby <- cbind(tabby_exp, tabby_ln)
 
   tabby$"est95" <-
     with(
