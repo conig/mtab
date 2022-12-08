@@ -12,6 +12,7 @@ RoxygenNote: 7.2.2
 Imports: 
     data.table,
     glue,
+    insight,
     papaja,
     parameters,
     performance
