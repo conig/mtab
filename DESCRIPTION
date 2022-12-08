@@ -13,9 +13,13 @@ Imports:
     data.table,
     glue,
     insight,
+    methods,
+    glmmTMB,
     papaja,
     parameters,
     performance
 Suggests: 
+    lme4,
+    MASS,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

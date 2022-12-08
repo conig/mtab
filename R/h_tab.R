@@ -10,7 +10,7 @@
 #' @examples
 #' m0  <- lm(mpg ~ hp, data = mtcars)
 #' m1 <- lm(mpg ~ hp + wt, data = mtcars)
-#' h_tab(m1, m0, model_name = "Horsepower and Weight")
+#' h_tab(m0, m1)
 
 methods::setGeneric("h_table_part",
                     function(m1,
@@ -63,6 +63,14 @@ methods::setGeneric("tab_model",
 
 
 
+#' tab_model.lm
+#'
+#' tab_model method for linear models
+#' @param model lm model
+#' @param ci_method confidence interval method send to parameters::parameters
+#' @param transf optional transformation function
+#' @param transf_name optional transformation name
+
 tab_model.lm <- function(model,
                          ci_method = NULL,
                          transf = NULL,
@@ -109,6 +117,14 @@ tab_model.lm <- function(model,
 
 }
 
+#' tab_model.glm
+#'
+#' tab_model method for general linear models
+#' @param model glm model
+#' @param ci_method confidence interval method send to parameters::parameters
+#' @param transf optional transformation function
+#' @param transf_name optional transformation name
+
 tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
                              transf_name = NULL){
 
@@ -149,6 +165,15 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
   tabby
 
 }
+
+#' tab_model.glmmTMB
+#'
+#' tab_model method for glmmTMB models
+#' @param model glmmTMB model
+#' @param ci_method confidence interval method send to parameters::parameters
+#' @param transf optional transformation function
+#' @param transf_name optional transformation name
+#' @importFrom glmmTMB glmmTMB
 
 tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
                              transf_name = NULL){
@@ -218,7 +243,7 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
 #' @examples
 #' m0  <- lm(mpg ~ hp, data = mtcars)
 #' m1 <- lm(mpg ~ hp + wt, data = mtcars)
-#' h_tab(m1, m0, model_name = "Horsepower and Weight")
+#' h_tab(m0, m1)
 
 
 h_table_part.lm <- function(m1, m0 = NULL, model_name = "untitled model", ci_method = "NULL", transf = NULL,
@@ -278,7 +303,7 @@ h_table_part.glm <-
     model_start <- c(model_name, rep("", ncol(tabby) - 1))
 
     if (!is.null(m0)) {
-      comp  <- anova(m0, m1, test = "LRT")
+      comp  <- stats::anova(m0, m1, test = "LRT")
       LRT <-
         with(
           comp[2, ],
@@ -322,7 +347,7 @@ h_table_part.glmmTMB <-
     model_start <- c(model_name, rep("", ncol(tabby) - 1))
 
     if (!is.null(m0)) {
-      comp  <- anova(m0, m1, test = "LRT")
+      comp  <- stats::anova(m0, m1, test = "LRT")
 
       LRT <-
         with(
@@ -391,10 +416,12 @@ class(out) <- c("h_tab", class(out))
 out
 }
 
-# Define methods
 
 methods::setMethod("tab_model", "lm", tab_model.lm)
 methods::setMethod("tab_model", "glm", tab_model.glm)
+
+requireNamespace("glmmTMB")
+
 methods::setMethod("tab_model", "glmmTMB", tab_model.glmmTMB)
 methods::setMethod("h_table_part", "lm", h_table_part.lm)
 methods::setMethod("h_table_part", "glm", h_table_part.glm)

@@ -26,5 +26,5 @@ h_tab
 \examples{
 m0  <- lm(mpg ~ hp, data = mtcars)
 m1 <- lm(mpg ~ hp + wt, data = mtcars)
-h_tab(m1, m0, model_name = "Horsepower and Weight")
+h_tab(m0, m1)
 }
