@@ -183,23 +183,26 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
   if(family$family == "binomial" & family$link == "logit") type <- "OR"
   if(family$family == "poisson" & family$link == "log") type <- "IRR"
 
-  tabby_exp <-
-    data.table::data.table(
-      parameters::parameters(
-        model,
-        ci_method = ci_method,
-        exponentiate = TRUE,
-        effects = "fixed"
-      )
-    )[, .(Parameter, CI_low, CI_high, Coefficient)]
+  # Extract parameters
+  params <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, effects = "fixed"))
+
+  params_exp <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, effects = "fixed", exponentiate = TRUE))
+
+  # Remove zero-inflation if present
+   if("Component" %in% names(params)){
+    params <- params[Component != "zero_inflated"]
+    params_exp <- params_exp[Component != "zero_inflated"]
+   }
+
+  # Get relevant columns
 
   tabby_ln <-
-    data.table::data.table(parameters::parameters(model, ci_method = "wald", effects = "fixed"))[, .(lnEffect = Coefficient, SE = SE, z, p)]
+      params[, .(lnEffect = Coefficient, SE = SE, z, p)]
 
-    if("Component" %in% names(tabby_exp)){
-    tabby_exp <- tabby_exp[Component != "zero_inflated"]
-    tabby_ln <- tabby_ln[Component != "zero_inflated"]
-    }
+  tabby_exp <-
+     params_exp[, .(Parameter, CI_low, CI_high, Coefficient)]
+
+  # Bind together exp and raw
 
   tabby <- cbind(tabby_exp, tabby_ln)
 

@@ -65,6 +65,7 @@ s3_register <- function (generic, class, method = NULL)
 #' @param span_text_columns passed to papaja::apa_table
 #' @param format.args passed to papaja::apa_table
 #' @param ... passed to papaja::apa_table
+#' @export
 
 apa_table.h_tab <-
   function(x,
