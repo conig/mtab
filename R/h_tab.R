@@ -1,5 +1,15 @@
 # Define generics
 
+methods::setGeneric("h_table_part",
+                    function(m1,
+                             m0 = NULL,
+                             model_name,
+                             ci_method = NULL,
+                             transf = NULL,
+                             transf_name = NULL)
+                      standardGeneric("h_table_part"),
+                    signature = "m1")
+
 #' h_tab
 #'
 #' @param m1 A model to describe
@@ -12,15 +22,7 @@
 #' m1 <- lm(mpg ~ hp + wt, data = mtcars)
 #' h_tab(m0, m1)
 
-methods::setGeneric("h_table_part",
-                    function(m1,
-                             m0 = NULL,
-                             model_name,
-                             ci_method = NULL,
-                             transf = NULL,
-                             transf_name = NULL)
-                      standardGeneric("h_table_part"),
-                    signature = "m1")
+
 
 #' tab
 #'
@@ -97,7 +99,7 @@ tab_model.lm <- function(model,
     as.character()
 
   tabby <-
-    tabby[, .(
+    tabby[, list(
       Term = Parameter,
       est95,
       b = papaja::print_num(Coefficient),
@@ -151,7 +153,7 @@ tab_model.lmerMod <- function(model,
     as.character()
 
   tabby <-
-    tabby[, .(
+    tabby[, list(
       Term = Parameter,
       est95,
       b = papaja::print_num(Coefficient),
@@ -187,8 +189,8 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
   if(family$family == "binomial" & family$link == "logit") type <- "OR"
   if(family$family == "poisson" & family$link == "log") type <- "IRR"
 
-  tabby_exp <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, exponentiate = TRUE))[, .(Parameter, CI_low, CI_high, Coefficient)]
-  tabby_ln <-data.table::data.table(parameters::parameters(model, ci_method = "wald"))[,.(lnEffect = Coefficient, SE = SE, z, p)]
+  tabby_exp <- data.table::data.table(parameters::parameters(model, ci_method = ci_method, exponentiate = TRUE))[, list(Parameter, CI_low, CI_high, Coefficient)]
+  tabby_ln <-data.table::data.table(parameters::parameters(model, ci_method = "wald"))[,list(lnEffect = Coefficient, SE = SE, z, p)]
   tabby <- cbind(tabby_exp, tabby_ln)
 
 
@@ -204,7 +206,7 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
   if(is.na(type)) stop("GLM family not yet supported")
 
   tabby <-
-    tabby[, .(
+    tabby[, list(
       Term = Parameter,
       est95,
       lnEffect = papaja::print_num(lnEffect),
@@ -251,10 +253,10 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
   # Get relevant columns
 
   tabby_ln <-
-      params[, .(lnEffect = Coefficient, SE = SE, z, p)]
+      params[, list(lnEffect = Coefficient, SE = SE, z, p)]
 
   tabby_exp <-
-     params_exp[, .(Parameter, CI_low, CI_high, Coefficient)]
+     params_exp[, list(Parameter, CI_low, CI_high, Coefficient)]
 
   # Bind together exp and raw
 
@@ -272,7 +274,7 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
   if(is.na(type)) stop("Unknown model family and type combination")
 
   tabby <-
-    tabby[, .(
+    tabby[, list(
       Term = Parameter,
       est95,
       lnEffect = papaja::print_num(lnEffect),
@@ -295,7 +297,7 @@ tab_model.glmmTMB <- function(model, ci_method = NULL, transf = NULL,
 #' @param m1 A model to describe
 #' @param m0 a nested, less complicated model
 #' @param model_name The display name of m1
-#' @import data.table
+#' @importFrom data.table data.table
 #'
 #' @examples
 #' m0  <- lm(mpg ~ hp, data = mtcars)

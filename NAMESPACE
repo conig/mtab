@@ -2,7 +2,6 @@
 
 export(apa_table.h_tab)
 export(h_tab)
-export(h_table_part)
 export(tab)
-import(data.table)
+importFrom(data.table,data.table)
 importFrom(glmmTMB,glmmTMB)
