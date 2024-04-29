@@ -347,7 +347,7 @@ h_table_part.glm <-
   function(m1,
            m0 = NULL,
            model_name = "untitled model",
-           ci_method = "NULL",
+           ci_method = NULL,
            transf = NULL,
            transf_name = NULL) {
     tabby <- tab_model(m1, ci_method = ci_method,
@@ -385,11 +385,55 @@ h_table_part.glm <-
     tab_out
   }
 
-h_table_part.lmerMod <- h_table_part.glmmTMB <-
+h_table_part.lmerMod <- function(m1,
+                                 m0 = NULL,
+                                 model_name = "untitled model",
+                                 ci_method = NULL,
+                                 transf = NULL,
+                                 transf_name = NULL) {
+
+
+  tabby <- tab_model(m1, ci_method = ci_method,
+                     transf = transf,
+                     transf_name = transf_name)
+
+  model_name <- glue::glue("{model_name}") |>
+    as.character()
+
+  model_start <- c(model_name, rep("", ncol(tabby) - 1))
+
+  if (!is.null(m0)) {
+    comp  <- stats::anova(m0, m1, test = "LRT")
+
+    LRT <-
+      with(
+        comp[2, ],
+        glue::glue(
+          "$\\chi^2$({`Df`}) = {papaja::print_num(Chisq)}, $p$ = {papaja::print_p(`Pr(>Chisq)`)}"
+        )
+      )
+
+  } else{
+    LRT <- " "
+  }
+
+  model_info <-
+    data.frame(matrix(c(model_start, LRT), nrow = 1))
+  names(model_info) <- c(names(tabby), "Likelihood Ratio Test")
+
+  tab_out <-
+    data.table::rbindlist(list(model_info, tabby), fill = TRUE)
+  tab_out[is.na(tab_out)] <- " "
+  tab_out$is_coef <- TRUE
+  tab_out$is_coef[1] <- FALSE
+  tab_out
+}
+
+h_table_part.glmmTMB <-
   function(m1,
            m0 = NULL,
            model_name = "untitled model",
-           ci_method = "NULL",
+           ci_method = NULL,
            transf = NULL,
            transf_name = NULL) {
 
