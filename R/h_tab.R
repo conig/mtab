@@ -117,6 +117,60 @@ tab_model.lm <- function(model,
 
 }
 
+#' tab_model.lmerMod
+#'
+#' tab_model method for lmerMod models
+#' @param model lmerMod model
+#' @param ci_method confidence interval method send to parameters::parameters
+#' @param transf optional transformation function
+#' @param transf_name optional transformation name
+
+tab_model.lmerMod <- function(model,
+                         ci_method = NULL,
+                         transf = NULL,
+                         transf_name = NULL) {
+  tabby <-
+    data.table::data.table(parameters::parameters(model, ci_method = ci_method))[Effects == "fixed"]
+
+  if (is.null(transf))
+    transf <- function(x)
+      x
+  if (is.null(transf_name))
+    transf_name <- "b"
+
+  process <- function(x)
+    papaja::print_num(transf(x))
+
+  tabby$"est95" <-
+    with(
+      tabby,
+      glue::glue(
+        "{process(Coefficient)} [{process(CI_low)}, {process(CI_high)}]"
+      )
+    ) |>
+    as.character()
+
+  tabby <-
+    tabby[, .(
+      Term = Parameter,
+      est95,
+      b = papaja::print_num(Coefficient),
+      SE = papaja::print_num(SE),
+      t = papaja::print_num(t),
+      p = papaja::print_p(p)
+    )]
+
+  names(tabby)[names(tabby) == "est95"] <- glue::glue("{transf_name} [95\\% CI]")
+
+  if (identical(transf, function(x)
+    x)) {
+    tabby$b <- NULL
+  }
+
+  tabby
+
+}
+
 #' tab_model.glm
 #'
 #' tab_model method for general linear models
@@ -331,7 +385,7 @@ h_table_part.glm <-
     tab_out
   }
 
-h_table_part.glmmTMB <-
+h_table_part.lmerMod <- h_table_part.glmmTMB <-
   function(m1,
            m0 = NULL,
            model_name = "untitled model",
@@ -426,6 +480,10 @@ methods::setMethod("tab_model", "glm", tab_model.glm)
 requireNamespace("glmmTMB")
 
 methods::setMethod("tab_model", "glmmTMB", tab_model.glmmTMB)
+methods::setMethod("tab_model", "lmerMod", tab_model.lmerMod)
+
+
 methods::setMethod("h_table_part", "lm", h_table_part.lm)
 methods::setMethod("h_table_part", "glm", h_table_part.glm)
 methods::setMethod("h_table_part", "glmmTMB", h_table_part.glmmTMB)
+methods::setMethod("h_table_part", "lmerMod", h_table_part.lmerMod)
