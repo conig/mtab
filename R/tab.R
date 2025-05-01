@@ -189,8 +189,7 @@ tab_model.glm <- function(model, ci_method = NULL, transf = NULL,
 
 }
 
-#' tab_model.glmmTMB
-#'
+#' tab_model.glmmTM'
 #' tab_model method for glmmTMB models
 #' @param model glmmTMB model
 #' @param ci_method confidence interval method send to parameters::parameters
@@ -276,6 +275,75 @@ tab_model.glmmTMB <- function(model,
 }
 
 
+#' tab_model.glmerMod
+#'
+#' Method for lme4::glmer models (generalised linear mixed models)
+#' @param model  glmerMod object
+#' @inheritParams tab_model.lm
+#' @importFrom lme4 glmer
+tab_model.glmerMod <- function(model,
+                               ci_method = NULL,
+                               transf      = NULL,
+                               transf_name = NULL) {
+
+  fam   <- insight::get_family(model)
+  type  <- NA_character_
+
+  if (fam$family == "binomial" && fam$link == "logit")  type <- "OR"
+  if (fam$family == "poisson"  && fam$link == "log")    type <- "IRR"
+  if (fam$family == "gaussian" && fam$link == "identity") type <- "b"
+
+  if (is.na(type))
+    stop("Model family/link not yet supported by tab_model.glmerMod")
+
+  ## fixed-effects parameters -----------------------------------------------
+  pe      <- data.table::data.table(
+               parameters::parameters(model,
+                                       ci_method   = ci_method,
+                                       effects     = "fixed",
+                                       exponentiate = (type != "b"))
+             )
+  raw_pe  <- data.table::data.table(
+               parameters::parameters(model,
+                                       ci_method   = ci_method,
+                                       effects     = "fixed",
+                                       exponentiate = FALSE))
+  if (type != "b") {
+    tab <- cbind(
+      pe[,    .(Parameter, CI_low, CI_high, Coefficient)],
+      raw_pe[,.(lnEffect = Coefficient, SE, z, p)]
+    )
+  } else {
+    tab <- pe[,.(Parameter, Coefficient, CI_low, CI_high, SE, z, p)]
+  }
+
+  tab[, est95 :=
+        glue::glue("{papaja::print_num(Coefficient)} ",
+                   "[{papaja::print_num(CI_low)}, ",
+                   "{papaja::print_num(CI_high)}]")]
+
+  out <- if (type != "b") {
+           tab[, .(Term = Parameter,
+                   est95,
+                   lnEffect = papaja::print_num(lnEffect),
+                   SE  = papaja::print_num(SE),
+                   z   = papaja::print_num(z),
+                   p   = papaja::print_p(p))]
+         } else {
+           tab[, .(Term = Parameter,
+                   est95,
+                   SE  = papaja::print_num(SE),
+                   z   = papaja::print_num(z),
+                   p   = papaja::print_p(p))]
+         }
+
+  names(out)[names(out) == "est95"] <- glue::glue("{type} [95\\% CI]")
+  setnames(out, old = "lnEffect", new = type, skip_absent = TRUE)
+  out
+}
+
+
+
 methods::setGeneric("tab_model",
                     function(model, ci_method = NULL,transf = NULL,
                              transf_name = NULL)
@@ -286,6 +354,10 @@ methods::setMethod("tab_model", "lm", tab_model.lm)
 methods::setMethod("tab_model", "glm", tab_model.glm)
 
 requireNamespace("glmmTMB")
+# glmmTMB is s3, need to set is up as an old s4 class
+if (!methods::isClass("glmmTMB"))
+  methods::setOldClass("glmmTMB")
 
 methods::setMethod("tab_model", "glmmTMB", tab_model.glmmTMB)
 methods::setMethod("tab_model", "lmerMod", tab_model.lmerMod)
+methods::setMethod("tab_model", "glmerMod", tab_model.glmerMod)
