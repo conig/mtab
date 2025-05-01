@@ -335,27 +335,32 @@ tab_model.glmerMod <- function(model,
     data.table::set(tab, j = nc, value = as.character(tab[[nc]]))
 
   ## assemble final table -----------------------------------------------------
-  out <- if (type != "b") {
-           tab[, .(Term     = Parameter,
-                   est95,
-                   lnEffect = tab[["lnEffect"]],
-                   SE       = tab[["SE"]],
-                   z        = tab[["z"]],
-                   p        = papaja::print_p(p))]
-         } else {
-           tab[, .(Term  = Parameter,
-                   est95,
-                   SE    = tab[["SE"]],
-                   z     = tab[["z"]],
-                   p     = papaja::print_p(p))]
-         }
+
+# replacement for the final table-assembly block
+if (type != "b") {
+  out <- tab[, .(
+           Term     = Parameter,
+           est95,
+           lnEffect = as.character(papaja::print_num(lnEffect)),
+           SE       = as.character(papaja::print_num(SE)),
+           z        = as.character(papaja::print_num(z)),
+           p        = papaja::print_p(p)
+         )]
+} else {
+  out <- tab[, .(
+           Term = Parameter,
+           est95,
+           SE   = as.character(papaja::print_num(SE)),
+           z    = as.character(papaja::print_num(z)),
+           p    = papaja::print_p(p)
+         )]
+}
+
 
   names(out)[names(out) == "est95"] <- glue::glue("{type} [95\\% CI]")
   data.table::setnames(out, old = "lnEffect", new = type, skip_absent = TRUE)
   out[]
 }
-
-
 
 methods::setGeneric("tab_model",
                     function(model, ci_method = NULL,transf = NULL,
