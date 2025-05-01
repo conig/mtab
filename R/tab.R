@@ -355,7 +355,7 @@ if (type != "b") {
 
 
   names(out)[names(out) == "est95"] <- glue::glue("{type} [95\\% CI]")
-  data.table::setnames(out, old = "lnEffect", new = type, skip_absent = TRUE)
+  data.table::setnames(out, old = "lnEffect", new = paste0("ln",type), skip_absent = TRUE)
   out[]
 }
 
@@ -367,7 +367,6 @@ methods::setGeneric("tab_model",
 
 methods::setMethod("tab_model", "lm", tab_model.lm)
 methods::setMethod("tab_model", "glm", tab_model.glm)
-
 requireNamespace("glmmTMB")
 # glmmTMB is s3, need to set is up as an old s4 class
 if (!methods::isClass("glmmTMB"))
