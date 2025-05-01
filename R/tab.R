@@ -291,11 +291,10 @@ tab_model.glmerMod <- function(model,
 
   if (fam$family == "binomial" && fam$link == "logit")     type <- "OR"
   if (fam$family == "poisson"  && fam$link == "log")       type <- "IRR"
-  if (fam$family == "gaussian" && fam$link == "identity")  type <- "b"
-
+  # if (fam$family == "gaussian" && fam$link == "identity")  type <- "b"
+  # Check if we have a valid type
   if (is.na(type))
     stop("Model family/link not yet supported by tab_model.glmerMod")
-
   ## ── fixed-effects parameters ───────────────────────────────────────────────
   pe <- data.table::data.table(
           parameters::parameters(model,
