@@ -282,64 +282,77 @@ tab_model.glmmTMB <- function(model,
 #' @inheritParams tab_model.lm
 #' @importFrom lme4 glmer
 tab_model.glmerMod <- function(model,
-                               ci_method = NULL,
-                               transf      = NULL,
+                               ci_method  = NULL,
+                               transf     = NULL,
                                transf_name = NULL) {
 
-  fam   <- insight::get_family(model)
-  type  <- NA_character_
+  fam  <- insight::get_family(model)
+  type <- NA_character_
 
-  if (fam$family == "binomial" && fam$link == "logit")  type <- "OR"
-  if (fam$family == "poisson"  && fam$link == "log")    type <- "IRR"
-  if (fam$family == "gaussian" && fam$link == "identity") type <- "b"
+  if (fam$family == "binomial" && fam$link == "logit")     type <- "OR"
+  if (fam$family == "poisson"  && fam$link == "log")       type <- "IRR"
+  if (fam$family == "gaussian" && fam$link == "identity")  type <- "b"
 
   if (is.na(type))
     stop("Model family/link not yet supported by tab_model.glmerMod")
 
-  ## fixed-effects parameters -----------------------------------------------
-  pe      <- data.table::data.table(
-               parameters::parameters(model,
-                                       ci_method   = ci_method,
-                                       effects     = "fixed",
-                                       exponentiate = (type != "b"))
-             )
-  raw_pe  <- data.table::data.table(
-               parameters::parameters(model,
-                                       ci_method   = ci_method,
-                                       effects     = "fixed",
-                                       exponentiate = FALSE))
-  if (type != "b") {
-    tab <- cbind(
-      pe[,    .(Parameter, CI_low, CI_high, Coefficient)],
-      raw_pe[,.(lnEffect = Coefficient, SE, z, p)]
-    )
-  } else {
-    tab <- pe[,.(Parameter, Coefficient, CI_low, CI_high, SE, z, p)]
-  }
+  ## ── fixed-effects parameters ───────────────────────────────────────────────
+  pe <- data.table::data.table(
+          parameters::parameters(model,
+                                 ci_method    = ci_method,
+                                 effects      = "fixed",
+                                 exponentiate = (type != "b"))
+        )
+  raw_pe <- data.table::data.table(
+              parameters::parameters(model,
+                                     ci_method    = ci_method,
+                                     effects      = "fixed",
+                                     exponentiate = FALSE)
+            )
 
-  tab[, est95 :=
-        glue::glue("{papaja::print_num(Coefficient)} ",
-                   "[{papaja::print_num(CI_low)}, ",
-                   "{papaja::print_num(CI_high)}]")]
-
-  out <- if (type != "b") {
-           tab[, .(Term = Parameter,
-                   est95,
-                   lnEffect = papaja::print_num(lnEffect),
-                   SE  = papaja::print_num(SE),
-                   z   = papaja::print_num(z),
-                   p   = papaja::print_p(p))]
+  tab <- if (type != "b") {
+           cbind(
+             pe[,  .(Parameter, CI_low, CI_high, Coefficient)],
+             raw_pe[, .(lnEffect = Coefficient, SE, z, p)]
+           )
          } else {
-           tab[, .(Term = Parameter,
+           pe[, .(Parameter, Coefficient, CI_low, CI_high, SE, z, p)]
+         }
+
+  ## 95 %-CI string (drop the "glue" class) -----------------------------------
+  tab[, est95 := as.character(                                    # ← CHANGED
+                    glue::glue_data(
+                      .SD,
+                      "{papaja::print_num(Coefficient)} ",
+                      "[{papaja::print_num(CI_low)}, ",
+                      "{papaja::print_num(CI_high)}]"
+                    )),
+      .SDcols = c("Coefficient", "CI_low", "CI_high")]
+
+  ## ensure printed numbers are plain characters (no "apa_num" class) ---------
+  num_cols <- c("lnEffect", "SE", "z")                # may not all exist
+  for (nc in intersect(num_cols, names(tab)))          # ← NEW
+    data.table::set(tab, j = nc, value = as.character(tab[[nc]]))
+
+  ## assemble final table -----------------------------------------------------
+  out <- if (type != "b") {
+           tab[, .(Term     = Parameter,
                    est95,
-                   SE  = papaja::print_num(SE),
-                   z   = papaja::print_num(z),
-                   p   = papaja::print_p(p))]
+                   lnEffect = tab[["lnEffect"]],
+                   SE       = tab[["SE"]],
+                   z        = tab[["z"]],
+                   p        = papaja::print_p(p))]
+         } else {
+           tab[, .(Term  = Parameter,
+                   est95,
+                   SE    = tab[["SE"]],
+                   z     = tab[["z"]],
+                   p     = papaja::print_p(p))]
          }
 
   names(out)[names(out) == "est95"] <- glue::glue("{type} [95\\% CI]")
-  setnames(out, old = "lnEffect", new = type, skip_absent = TRUE)
-  out
+  data.table::setnames(out, old = "lnEffect", new = type, skip_absent = TRUE)
+  out[]
 }
 
 
