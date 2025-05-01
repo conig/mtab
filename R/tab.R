@@ -329,23 +329,20 @@ tab_model.glmerMod <- function(model,
                     )),
       .SDcols = c("Coefficient", "CI_low", "CI_high")]
 
-  ## ensure printed numbers are plain characters (no "apa_num" class) ---------
-  num_cols <- c("lnEffect", "SE", "z")                # may not all exist
-  for (nc in intersect(num_cols, names(tab)))          # ← NEW
-    data.table::set(tab, j = nc, value = as.character(tab[[nc]]))
-
-  ## assemble final table -----------------------------------------------------
-
 # replacement for the final table-assembly block
 if (type != "b") {
-  out <- tab[, .(
+  out <- tab[,
+        {
+             .(
            Term     = Parameter,
            est95,
            lnEffect = as.character(papaja::print_num(lnEffect)),
            SE       = as.character(papaja::print_num(SE)),
            z        = as.character(papaja::print_num(z)),
            p        = papaja::print_p(p)
-         )]
+         )
+        }
+             ]
 } else {
   out <- tab[, .(
            Term = Parameter,
