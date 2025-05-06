@@ -19,3 +19,10 @@ test_that("Logistic glmmTMB succeeds", {
   testthat::expect_no_error(mtab::h_tab(m1, m2))
 
 })
+
+test_that("nbinom1 glmmTMB successed",{
+  m1 <- glmmTMB(y ~ Ed + (1|So), data = MASS::UScrime, family = nbinom1())
+  m2 <- glmmTMB(y ~ Ed + I(M.F/1000) + (1|So), data = MASS::UScrime, family = nbinom1())
+
+  testthat::expect_no_error(mtab::h_tab(m1, m2))
+})

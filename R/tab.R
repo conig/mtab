@@ -205,10 +205,10 @@ tab_model.glmmTMB <- function(model,
   family <- insight::get_family(model)
   type <- NA
 
-  if(family$family == "binomial" & family$link == "logit") type <- "OR"
-  if(family$family == "poisson" & family$link == "log") type <- "IRR"
-  if(family$family == "gaussian" & family$link == "identity") type <- "b"
-
+  if(family$family == "binomial" && family$link == "logit") type <- "OR"
+  if(family$family == "poisson" && family$link == "log") type <- "IRR"
+  if(family$family == "gaussian" && family$link == "identity") type <- "b"
+  if(family$family == "nbinom1" && family$link == "log") type <- "IRR"
   if(is.na(type)) stop("Unknown model family and type combination")
 
   # Extract parameters
