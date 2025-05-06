@@ -209,6 +209,7 @@ tab_model.glmmTMB <- function(model,
   if(family$family == "poisson" && family$link == "log") type <- "IRR"
   if(family$family == "gaussian" && family$link == "identity") type <- "b"
   if(family$family == "nbinom1" && family$link == "log") type <- "IRR"
+  if(family$family == "nbinom2" && family$link == "log") type <- "IRR"
   if(is.na(type)) stop("Unknown model family and type combination")
 
   # Extract parameters
