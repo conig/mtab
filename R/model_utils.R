@@ -1,4 +1,4 @@
-safe_convergence <- function(m) {
+silent_check_convergence <- function(m) {
   # Suppress warnings, messages, and any printed output from upstream
   conv <- NULL
   tmp <- utils::capture.output({

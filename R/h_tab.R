@@ -19,7 +19,7 @@ h_tab <- function(
     models <- models[[1]]
   }
   # get convergence information
-  conv_list <- lapply(models, safe_convergence)
+  conv_list <- lapply(models, silent_check_convergence)
   conv_vec <- unlist(conv_list)
   conv_vec_simple <- conv_vec
   conv_vec_simple[is.na(conv_vec_simple)] <- TRUE
