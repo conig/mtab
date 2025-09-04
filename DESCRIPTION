@@ -1,6 +1,6 @@
 Package: mtab
 Title: Creates tables for commonly used models
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: 
     person("James", "Conigrave", , "james.conigrave@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-8816-6229"))

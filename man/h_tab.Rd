@@ -13,7 +13,8 @@ h_tab(..., ci_method = NULL, transf = NULL, transf_name = NULL)
 
 \item{transf}{function to transform coef and 95\% CI}
 
-\item{transf_name}{what should the transformed column be called?}
+\item{transf_name}{what should the transformed column be called?
+indicator in the output object's \code{convergence} attribute. Defaults to FALSE.}
 }
 \description{
 h_tab
