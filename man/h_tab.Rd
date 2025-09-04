@@ -4,7 +4,13 @@
 \alias{h_tab}
 \title{h_tab}
 \usage{
-h_tab(..., ci_method = NULL, transf = NULL, transf_name = NULL)
+h_tab(
+  ...,
+  ci_method = NULL,
+  transf = NULL,
+  transf_name = NULL,
+  convergence_label = NULL
+)
 }
 \arguments{
 \item{...}{a list of models, otherwise named models}
@@ -13,8 +19,9 @@ h_tab(..., ci_method = NULL, transf = NULL, transf_name = NULL)
 
 \item{transf}{function to transform coef and 95\% CI}
 
-\item{transf_name}{what should the transformed column be called?
-indicator in the output object's \code{convergence} attribute. Defaults to FALSE.}
+\item{transf_name}{what should the transformed column be called?}
+
+\item{convergence_label}{String. If not NULL, will add the specifed convergence string following model names}
 }
 \description{
 h_tab
