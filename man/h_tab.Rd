@@ -9,7 +9,7 @@ h_tab(
   ci_method = NULL,
   transf = NULL,
   transf_name = NULL,
-  convergence_label = NULL
+  conv_fail_label = "(no convergence)"
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ h_tab(
 
 \item{transf_name}{what should the transformed column be called?}
 
-\item{convergence_label}{String. If not NULL, will add the specifed convergence string following model names}
+\item{conv_fail_label}{String. If not NULL, will add the specifed string following model names when models fail to converge}
 }
 \description{
 h_tab

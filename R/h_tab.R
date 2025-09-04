@@ -3,7 +3,7 @@
 #' @param ci_method what method should be used to derive confidence intervals?
 #' @param transf function to transform coef and 95% CI
 #' @param transf_name what should the transformed column be called?
-#' @param convergence_label String. If not NULL, will add the specifed convergence string following model names
+#' @param conv_fail_label String. If not NULL, will add the specifed string following model names when models fail to converge
 #' @export
 
 h_tab <- function(
@@ -11,7 +11,7 @@ h_tab <- function(
   ci_method = NULL,
   transf = NULL,
   transf_name = NULL,
-  convergence_label = NULL
+  conv_fail_label = "(no convergence)"
 ) {
   models <- list(...)
 
@@ -32,10 +32,10 @@ h_tab <- function(
     stop("Model names must be same length as models")
   }
   # add convergence label where provided
-  if (!is.null(convergence_label) & any(!conv_vec_simple)) {
+  if (!is.null(conv_fail_label) & any(!conv_vec_simple)) {
     model_names[!conv_vec_simple] <- paste0(
       model_names[!conv_vec_simple],
-      convergence_label
+      conv_fail_label
     )
   }
   out <- lapply(seq_along(models), function(m) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/tab.R
 \name{tab}
 \alias{tab}
-\title{tab}
+\title{Assemble model info into data.frame}
 \usage{
 tab(model, ci_method = NULL, transf = NULL, transf_name = NULL, replace = NULL)
 }
